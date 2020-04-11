@@ -73,7 +73,7 @@ autocmd BufEnter     * call BuffergatorUpdateMRU(expand('<abuf>'))
 autocmd BufRead      * call BuffergatorUpdateMRU(expand('<abuf>'))
 autocmd BufNewFile   * call BuffergatorUpdateMRU(expand('<abuf>'))
 autocmd BufWritePost * call BuffergatorUpdateMRU(expand('<abuf>'))
-augroup NONE
+augroup END
 
 " 1}}}
 
