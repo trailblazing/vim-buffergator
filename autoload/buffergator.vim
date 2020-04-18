@@ -1978,4 +1978,4 @@ augroup NONE
 let &cpo = s:save_cpo
 " 1}}}
 
-" vim:foldlevel=4:
+" vim:foldlevel=4:foldmarker={{{,}}}:foldmethod=marker
