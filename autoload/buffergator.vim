@@ -1133,8 +1133,8 @@ function! s:NewBufferCatalogViewer()
 
     " Populates the buffer list
     function! catalog_viewer.update_buffers_info() dict
-        " let self.buffers_catalog = self.list_buffers()
-        let self.buffers_catalog = self.get_buffers()
+        let self.buffers_catalog = self.list_buffers()
+        " let self.buffers_catalog = self.get_buffers()
         return self.buffers_catalog
     endfunction
 
