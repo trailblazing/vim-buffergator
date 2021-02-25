@@ -614,7 +614,7 @@ function! s:NewCatalogViewer(name, title)
                 \ 'is_unlisted'  : !_bufinfo.listed,
                 \ 'is_current'   : (l:number == l:curr_buffer),
                 \ 'is_alternate' : (l:number == l:alternate),
-                \ 'is_active'    : _bufinfo.loaded && !empty(_bufinfo.windows)
+                \ 'is_active'    : _bufinfo.loaded && !empty(_bufinfo.windows),
                 \ 'is_loaded'    : _bufinfo.loaded,
                 \ 'is_visible'   : !empty(_bufinfo.windows),
                 \ 'is_modifiable': getbufvar(l:number, '&modifiable'),
