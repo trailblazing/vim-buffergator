@@ -594,6 +594,7 @@ function! s:NewCatalogViewer(name, title)
     " List all buffers to show (or not) in the Buffergator window.
     function! catalog_viewer.get_buffers() dict
       let self.max_buffer_basename_len = 0
+      let l:catalog     = []
       let l:last_buffer = bufnr('$')
       let l:curr_buffer = bufnr('%')
       let l:alternate   = bufnr('#')
@@ -625,12 +626,12 @@ function! s:NewCatalogViewer(name, title)
           if len(_info['basename']) > self.max_buffer_basename_len
             let self.max_buffer_basename_len = len(_info['basename'])
           endif
-          call add(bcat, _info)
+          call add(l:catalog, _info)
         endif
         let l:number += 1
       endwhile
 
-      return sort(bcat, 's:_compare_dicts_by_' . self.sort_regime)
+      return sort(l:catalog, 's:_compare_dicts_by_' . self.sort_regime)
 
     endfunction
 
