@@ -506,101 +506,17 @@ function! s:NewCatalogViewer(name, title)
     endfunction
 
     function! catalog_viewer.list_buffers() dict
-        let bcat = []
-        redir => buffers_output
-        execute('silent ls')
-        redir END
-        let self.max_buffer_basename_len = 0
-        let l:buffers_output_rows = split(l:buffers_output, "\n")
-        for l:buffers_output_row in l:buffers_output_rows
-            let l:parts = matchlist(l:buffers_output_row, '^\s*\(\d\+\)\(.....\) "\(.*\)"')
-            let l:info = {}
-            let l:info["bufnum"] = l:parts[1] + 0
-            if l:parts[2][0] == "u"
-                let l:info["is_unlisted"] = 1
-                let l:info["is_listed"] = 0
-            else
-                let l:info["is_unlisted"] = 0
-                let l:info["is_listed"] = 1
-            endif
-            if l:parts[2][1] == "%"
-                let l:info["is_current"] = 1
-                let l:info["is_alternate"] = 0
-            elseif l:parts[2][1] == "#"
-                let l:info["is_current"] = 0
-                let l:info["is_alternate"] = 1
-            else
-                let l:info["is_current"] = 0
-                let l:info["is_alternate"] = 0
-            endif
-            if l:parts[2][2] == "a"
-                let l:info["is_active"] = 1
-                let l:info["is_loaded"] = 1
-                let l:info["is_visible"] = 1
-            elseif l:parts[2][2] == "h"
-                let l:info["is_active"] = 0
-                let l:info["is_loaded"] = 1
-                let l:info["is_visible"] = 0
-            else
-                let l:info["is_active"] = 0
-                let l:info["is_loaded"] = 0
-                let l:info["is_visible"] = 0
-            endif
-            if l:parts[2][3] == "-"
-                let l:info["is_modifiable"] = 0
-                let l:info["is_readonly"] = 0
-            elseif l:parts[2][3] == "="
-                let l:info["is_modifiable"] = 1
-                let l:info["is_readonly"] = 1
-            else
-                let l:info["is_modifiable"] = 1
-                let l:info["is_readonly"] = 0
-            endif
-            if l:parts[2][4] == "+"
-                let l:info["is_modified"] = 1
-                let l:info["is_readerror"] = 0
-            elseif l:parts[2][4] == "x"
-                let l:info["is_modified"] = 0
-                let l:info["is_readerror"] = 0
-            else
-                let l:info["is_modified"] = 0
-                let l:info["is_readerror"] = 0
-            endif
-            let l:info["bufname"] = parts[3]
-            let l:info["filepath"] = fnamemodify(l:info["bufname"], ":p")
-            " if g:buffergator_show_full_directory_path
-            "     let l:info["filepath"] = fnamemodify(l:info["bufname"], ":p")
-            " else
-            "     let l:info["filepath"] = fnamemodify(l:info["bufname"], ":.")
-            " endif
-            let l:info["basename"] = fnamemodify(l:info["bufname"], ":t")
-            if len(l:info["basename"]) > self.max_buffer_basename_len
-                let self.max_buffer_basename_len = len(l:info["basename"])
-            endif
-            let l:info["parentdir"] = fnamemodify(l:info["bufname"], ":p:h")
-            if g:buffergator_show_full_directory_path
-                let l:info["parentdir"] = fnamemodify(l:info["bufname"], ":p:h")
-            else
-                let l:info["parentdir"] = fnamemodify(l:info["bufname"], ":h")
-            endif
-            let l:info["extension"] = fnamemodify(l:info["bufname"], ":e")
-            call add(bcat, l:info)
-            " let l:buffers_info[l:info[l:key]] = l:info
-        endfor
-        let l:sort_func = "s:_compare_dicts_by_" . self.sort_regime
-        return sort(bcat, l:sort_func)
+      return self.get_buffers()
     endfunction
 
     " List all buffers to show (or not) in the Buffergator window.
     function! catalog_viewer.get_buffers() dict
       let self.max_buffer_basename_len = 0
       let l:catalog     = []
-      let l:last_buffer = bufnr('$')
       let l:curr_buffer = bufnr('%')
       let l:alternate   = bufnr('#')
-      let l:number = 1
 
-      while l:number < l:last_buffer
+      for l:number in range(1, bufnr('$'))
         if bufexists(l:number)
           let _bufinfo = getbufinfo(l:number)[0]
           let _info = {
@@ -623,13 +539,18 @@ function! s:NewCatalogViewer(name, title)
                 \ 'is_modified'  : _bufinfo.changed,
                 \ 'is_readerror' : 0
                 \}
-          if len(_info['basename']) > self.max_buffer_basename_len
-            let self.max_buffer_basename_len = len(_info['basename'])
+
+          if len(_info.basename) > self.max_buffer_basename_len
+            let self.max_buffer_basename_len = len(_info.basename)
           endif
+
+          if g:buffergator_show_full_directory_path
+            let l:catalog.parentdir = l:catalog.fullpath
+          endif
+
           call add(l:catalog, _info)
         endif
-        let l:number += 1
-      endwhile
+      endfor
 
       return sort(l:catalog, 's:_compare_dicts_by_' . self.sort_regime)
 

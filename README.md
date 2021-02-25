@@ -20,7 +20,7 @@ same window; preview buffer without leaving buffer listing; "pin" the buffer
 listing so that it is open all the time, etc. etc.)
 
 Details
-=======
+-------
 
 Buffergator is a plugin for listing, navigating between, and selecting buffers
 to edit. Upon invocation (using the command, `:BuffergatorOpen` or
@@ -83,22 +83,18 @@ addition, in normal mode from any buffer, you can flip through the MRU
 the `gb` (or `<M-b>`) and `gB` (or `<M-S-b>`) keys, or flip through the buffers
 in buffer (number) order by using `[b` and `]b`.  If you prefer to map other
 keys, or do not want any keys mapped at all, set
-`g:buffergator_suppress_keymaps` to 1 in your $VIMRUNTIME.
+`g:buffergator_suppress_keymaps` to 1 in your \$VIMRUNTIME.
 
-[NOTE: If you have other plugins installed that have key maps that start with
-`<Leader>b` (e.g., BufExplorer, which uses `<Leader>bs`, `<Leader>bv`, etc.),
-then you may notice a slight delay or lag when typing the default `<Leader>b`
-to start Buffergator. In this case, you should either use another keymap for
-Buffergator or BufExplorer.]
+NOTE: If you have other plugins installed that have key maps that start with `<Leader>b` (e.g., BufExplorer, which uses `<Leader>bs`, `<Leader>bv`, etc.), then you may notice a slight delay or lag when typing the default `<Leader>b` to start Buffergator. In this case, you should either use another keymap for Buffergator or BufExplorer.
 
 Detailed usage description given in the help file, which can be viewed on-line
 here:
 
-    http://github.com/jeetsukumaran/vim-buffergator/blob/master/doc/buffergator.txt
+[http://github.com/jeetsukumaran/vim-buffergator/blob/master/doc/buffergator.txt]
 
 Source code repository can be found here:
 
-    http://github.com/jeetsukumaran/vim-buffergator
+[http://github.com/jeetsukumaran/vim-buffergator]
 
 NOTE: There are many other plugins that provide similar functionality. This
 plugin is very much in the "BufExplorer" and "SelectBuf" vein, in that it
