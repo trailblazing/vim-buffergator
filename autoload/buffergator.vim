@@ -1249,6 +1249,10 @@ function! s:NewBufferCatalogViewer()
         let self.jump_map = {}
         let l:initial_line = 1
         for l:bufinfo in self.buffers_catalog
+            if l:bufinfo.is_unlisted
+              continue
+            endif
+
             if self.calling_bufnum == l:bufinfo.bufnum
                 let l:initial_line = line("$")
             endif
