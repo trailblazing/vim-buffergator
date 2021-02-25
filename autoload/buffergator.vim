@@ -1758,7 +1758,7 @@ function! BuffergatorBuffersStatusLine()
     let l:line = line(".")
     let l:status_line = "[[buffergator]]"
     if has_key(b:buffergator_catalog_viewer.jump_map, l:line)
-        let l:status_line .= " Buffer " . string(l:line) . " of " . string(len(b:buffergator_catalog_viewer.buffers_catalog))
+        let l:status_line .= " Buffer " . string(l:line) . " of " . string(line('$'))
     endif
     return l:status_line
 endfunction
