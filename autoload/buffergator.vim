@@ -524,7 +524,7 @@ function! s:NewCatalogViewer(name, title)
                 \ 'bufname'      : _bufinfo.name,
                 \ 'filepath'     : fnamemodify(_bufinfo.name, ':p'),
                 \ 'basename'     : fnamemodify(_bufinfo.name, ':t'),
-                \ 'parentdir'    : fnamemodify(_bufinfo.name, ':h'),
+                \ 'parentdir'    : fnamemodify(_bufinfo.name, ':.:h'),
                 \ 'fullpath'     : fnamemodify(_bufinfo.name, ':p:h'),
                 \ 'extension'    : fnamemodify(_bufinfo.name, ':e'),
                 \ 'is_listed'    : _bufinfo.listed,
