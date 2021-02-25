@@ -591,6 +591,49 @@ function! s:NewCatalogViewer(name, title)
         return sort(bcat, l:sort_func)
     endfunction
 
+    " List all buffers to show (or not) in the Buffergator window.
+    function! catalog_viewer.get_buffers() dict
+      let self.max_buffer_basename_len = 0
+      let l:last_buffer = bufnr('$')
+      let l:curr_buffer = bufnr('%')
+      let l:alternate   = bufnr('#')
+      let l:number = 1
+
+      while l:number < l:last_buffer
+        if bufexists(l:number)
+          let _bufinfo = getbufinfo(l:number)[0]
+          let _info = {
+                \ 'bufnum'       : _bufinfo.bufnr,
+                \ 'bufname'      : _bufinfo.name,
+                \ 'filepath'     : fnamemodify(_bufinfo.name, ':p'),
+                \ 'basename'     : fnamemodify(_bufinfo.name, ':t'),
+                \ 'parentdir'    : fnamemodify(_bufinfo.name, ':h'),
+                \ 'fullpath'     : fnamemodify(_bufinfo.name, ':p:h'),
+                \ 'extension'    : fnamemodify(_bufinfo.name, ':e'),
+                \ 'is_listed'    : _bufinfo.listed,
+                \ 'is_unlisted'  : !_bufinfo.listed,
+                \ 'is_current'   : (l:number == l:curr_buffer),
+                \ 'is_alternate' : (l:number == l:alternate),
+                \ 'is_active'    : _bufinfo.loaded && !empty(_bufinfo.windows)
+                \ 'is_loaded'    : _bufinfo.loaded,
+                \ 'is_visible'   : !empty(_bufinfo.windows),
+                \ 'is_modifiable': getbufvar(l:number, '&modifiable'),
+                \ 'is_readonly'  : !getbufvar(l:number, '&modifiable'),
+                \ 'is_modified'  : _bufinfo.changed,
+                \ 'is_readerror' : 0
+                \}
+          if len(_info['basename']) > self.max_buffer_basename_len
+            let self.max_buffer_basename_len = len(_info['basename'])
+          endif
+          call add(bcat, _info)
+        endif
+        let l:number += 1
+      endwhile
+
+      return sort(bcat, 's:_compare_dicts_by_' . self.sort_regime)
+
+    endfunction
+
     " Opens viewer if closed, closes viewer if open.
     function! catalog_viewer.toggle() dict
         " get buffer number of the catalog view buffer, creating it if neccessary
@@ -1089,7 +1132,8 @@ function! s:NewBufferCatalogViewer()
 
     " Populates the buffer list
     function! catalog_viewer.update_buffers_info() dict
-        let self.buffers_catalog = self.list_buffers()
+        " let self.buffers_catalog = self.list_buffers()
+        let self.buffers_catalog = self.get_buffers()
         return self.buffers_catalog
     endfunction
 
@@ -1979,4 +2023,3 @@ augroup NONE
 let &cpo = s:save_cpo
 " 1}}}
 
-" vim:foldlevel=4:foldmarker={{{,}}}:foldmethod=marker

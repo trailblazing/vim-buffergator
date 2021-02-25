@@ -132,4 +132,3 @@ endif
 let &cpo = s:save_cpo
 " 1}}}
 
-" vim:foldlevel=4:
