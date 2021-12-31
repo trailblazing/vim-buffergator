@@ -545,7 +545,7 @@ function! s:NewCatalogViewer(name, title)
           endif
 
           if g:buffergator_show_full_directory_path
-            let l:catalog.parentdir = l:catalog.fullpath
+            let _info.parentdir = _info.fullpath
           endif
 
           call add(l:catalog, _info)
