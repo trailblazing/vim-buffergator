@@ -593,7 +593,7 @@ function! s:NewCatalogViewer(name, title)
             return
         elseif l:bfwn >= 0
             " viewport with buffer exists, but not current
-            execute(l:bfwn . " wincmd w")
+            execute(l:bfwn . "wincmd w")
         else
             " create viewport
             let self.split_mode = s:_get_split_mode()
@@ -806,7 +806,7 @@ function! s:NewCatalogViewer(name, title)
     " window requires it to be split, 1 otherwise
     function! catalog_viewer.is_usable_viewport(winnumber) dict
         "gotta split if theres only one window (i.e. the NERD tree)
-        if winnr("$") ==# 1
+        if !empty(getbufvar(winnumber, "&buftype")) && &buftype == ''
             return 0
         endif
         let oldwinnr = winnr()
