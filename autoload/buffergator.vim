@@ -806,7 +806,7 @@ function! s:NewCatalogViewer(name, title)
     " window requires it to be split, 1 otherwise
     function! catalog_viewer.is_usable_viewport(winnumber) dict
         "gotta split if theres only one window (i.e. the NERD tree)
-        if !empty(getbufvar(a:winnumber, "&buftype")) && &buftype == ''
+        if !empty(getbufvar(winbufnr(a:winnumber), "&buftype"))
             return 0
         endif
         let oldwinnr = winnr()
