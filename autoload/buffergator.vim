@@ -475,6 +475,10 @@ function! s:NewCatalogViewer(name, title)
     let catalog_viewer = {}
     let catalog_viewer["bufname"] = a:name
     let catalog_viewer["title"] = a:title
+
+    " Initialize object state.
+    let catalog_viewer["bufnum"] = -1
+
     let l:buffergator_bufs = s:_find_buffers_with_var("is_buffergator_buffer", 1)
     if len(l:buffergator_bufs) > 0
         let catalog_viewer["bufnum"] = l:buffergator_bufs[0]
@@ -487,9 +491,6 @@ function! s:NewCatalogViewer(name, title)
     let catalog_viewer["columns_expanded"] = 0
     let catalog_viewer["lines_expanded"] = 0
     let catalog_viewer["max_buffer_basename_len"] = 30
-
-    " Initialize object state.
-    let catalog_viewer["bufnum"] = -1
 
     function! catalog_viewer.line_symbols(bufinfo) dict
       let l:line_symbols = ""
@@ -1349,15 +1350,15 @@ function! s:NewBufferCatalogViewer()
             return 0
         endif
         let l:cur_tab_num = tabpagenr()
-        if (self.split_mode != "buffer" || !empty(a:split_cmd)) && !a:keep_catalog
-            call self.close(0)
-        endif
         call self.visit_buffer(l:jump_to_bufnum, a:split_cmd)
         if a:keep_catalog && a:refocus_catalog
             execute("tabnext " . l:cur_tab_num)
             execute(bufwinnr(self.bufnum) . "wincmd w")
         endif
         call s:_buffergator_messenger.send_info(expand(bufname(l:jump_to_bufnum)))
+        if (self.split_mode != "buffer" || !empty(a:split_cmd)) && !a:keep_catalog
+            call self.close(0)
+        endif
     endfunction
 
     " Go to the selected buffer, preferentially using a window that already is
@@ -1734,10 +1735,10 @@ function! s:NewTabCatalogViewer()
             return 0
         endif
         let [l:jump_to_tabnum, l:jump_to_winnum] = self.jump_map[l:cur_line].target
-        call self.close(0)
         execute("tabnext " . l:jump_to_tabnum)
         execute(l:jump_to_winnum . "wincmd w")
         " call s:_buffergator_messenger.send_info(expand(bufname(l:jump_to_bufnum)))
+        call self.close(0)
     endfunction
 
     function! catalog_viewer.setup_buffer_statusline() dict
@@ -1948,4 +1949,3 @@ augroup NONE
 " restore options
 let &cpo = s:save_cpo
 " 1}}}
-
