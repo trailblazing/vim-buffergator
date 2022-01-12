@@ -789,41 +789,32 @@ function! s:NewCatalogViewer(name, title)
 
     " from NERD_Tree: find the window number of the first normal window
     function! catalog_viewer.first_usable_viewport() dict
+        let usable_index = -1
         let i = 1
         while i <= winnr("$")
             let bnum = winbufnr(i)
-            if bnum != -1 && getbufvar(bnum, '&buftype') ==# ''
-                        \ && !getwinvar(i, '&previewwindow')
-                        \ && (!getbufvar(bnum, '&modified') || &hidden)
-                return i
+            if 1 == catalog_viewer.is_usable_viewport(bnum)
+                let usable_index = i
+                break
             endif
 
             let i += 1
         endwhile
-        return -1
+        return usable_index
     endfunction
 
     " from NERD_Tree: returns 0 if opening a file from the tree in the given
     " window requires it to be split, 1 otherwise
     function! catalog_viewer.is_usable_viewport(winnumber) dict
-        "gotta split if theres only one window (i.e. the NERD tree)
-        if !empty(getbufvar(winbufnr(a:winnumber), "&buftype"))
-            return 0
+        let usable = 0
+        let bnum = winbufnr(a:winnumber)
+        if bnum != -1 && getbufvar(bnum, '&buftype') ==# ''
+                    \ && !getwinvar(a:winnumber, '&previewwindow')
+                    \ && (!getbufvar(bnum, '&modified') || &hidden)
+                    " \ && self.num_viewports_on_buffer(winbufnr(a:winnumber)) >= 2
+            let usable = 1
         endif
-        let oldwinnr = winnr()
-        execute(a:winnumber . "wincmd p")
-        let specialWindow = getbufvar("%", '&buftype') != '' || getwinvar('%', '&previewwindow')
-        let modified = &modified
-        execute(oldwinnr . "wincmd p")
-        "if its a special window e.g. quickfix or another explorer plugin then we
-        "have to split
-        if specialWindow
-            return 0
-        endif
-        if &hidden
-            return 1
-        endif
-        return !modified || self.num_viewports_on_buffer(winbufnr(a:winnumber)) >= 2
+        return usable
     endfunction
 
     " Acquires a viewport to show the source buffer. Returns the split command
