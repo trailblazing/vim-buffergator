@@ -793,7 +793,7 @@ function! s:NewCatalogViewer(name, title)
         let i = 1
         while i <= winnr("$")
             let bnum = winbufnr(i)
-            if 1 == catalog_viewer.is_usable_viewport(bnum)
+            if 1 == self.is_usable_viewport(bnum)
                 let usable_index = i
                 break
             endif
