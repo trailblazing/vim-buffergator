@@ -77,6 +77,13 @@ endif
 if !exists("g:buffergator_window_statusline")
     let g:buffergator_window_statusline = 1
 endif
+if ! exists("g:_buffergator_develop")
+    let s:_buffergator_develop = 0
+    let g:_buffergator_develop = 0
+else
+    let s:_buffergator_develop = g:_buffergator_develop
+endif
+
 " 1}}}
 
 " Script Data and Variables {{{1
@@ -697,20 +704,20 @@ function! s:NewCatalogViewer(name, title)
             return
         endif
         call self.contract_screen()
+        execute("bwipe " . self.bufnum)
         if a:restore_prev_window
             if !self.is_usable_viewport(winnr("#")) && self.first_usable_viewport() ==# -1
             else
                 try
-                    if !self.is_usable_viewport(winnr("#"))
-                        execute(self.first_usable_viewport() . "wincmd w")
+                    if self.is_usable_viewport(self.calling_bufnum)
+                        execute(bufwinnr(self.calling_bufnum) . "wincmd w")
                     else
-                        execute('wincmd p')
+                        execute(self.first_usable_viewport() . "wincmd w")
                     endif
                 catch //
                 endtry
             endif
         endif
-        execute("bwipe " . self.bufnum)
         let s:is_buffergator_buffers_open = 0
     endfunction
 
@@ -792,12 +799,10 @@ function! s:NewCatalogViewer(name, title)
         let usable_index = -1
         let i = 1
         while i <= winnr("$")
-            let bnum = winbufnr(i)
-            if 1 == self.is_usable_viewport(bnum)
+            if 1 == self.is_usable_viewport(i)
                 let usable_index = i
                 break
             endif
-
             let i += 1
         endwhile
         return usable_index
@@ -809,9 +814,11 @@ function! s:NewCatalogViewer(name, title)
         let usable = 0
         let bnum = winbufnr(a:winnumber)
         if bnum != -1 && getbufvar(bnum, '&buftype') ==# ''
-                    \ && !getwinvar(a:winnumber, '&previewwindow')
-                    \ && (!getbufvar(bnum, '&modified') || &hidden)
-                    " \ && self.num_viewports_on_buffer(winbufnr(a:winnumber)) >= 2
+            \ && ! exists('getbufvar(bnum, "")["is_buffergator_buffer"]')
+            \ && 1 == getbufvar(bnum, '&modifiable')
+            \ && ! getwinvar(a:winnumber, '&previewwindow')
+            \ && (! getbufvar(bnum, '&modified') || &hidden)
+            " \ && self.num_viewports_on_buffer(winbufnr(a:winnumber)) >= 2
             let usable = 1
         endif
         return usable
@@ -820,7 +827,17 @@ function! s:NewCatalogViewer(name, title)
     " Acquires a viewport to show the source buffer. Returns the split command
     " to use when switching to the buffer.
     function! catalog_viewer.acquire_viewport(split_cmd)
+        let result = ""
+        if 1 == s:_buffergator_develop
+            " https://github.com/trailblazing/boot
+            call boot#log_silent('acquire_viewport::self.is_usable_viewport(winnr(\"\#\"))', self.is_usable_viewport(winnr("#")))
+            call boot#log_silent("acquire_viewport::self.is_usable_viewport(" . self.calling_bufnum . ")", self.is_usable_viewport(self.calling_bufnum))
+            call boot#log_silent("acquire_viewport::self.first_usable_viewport()", self.first_usable_viewport())
+        endif
         if self.split_mode == "buffer" && empty(a:split_cmd)
+            if 1 == s:_buffergator_develop
+                call boot#log_silent("acquire_viewport::result = \"\"", result)
+            endif
             " buffergator used original buffer's viewport,
             " so the the buffergator viewport is the viewport to use
             return ""
@@ -830,16 +847,30 @@ function! s:NewCatalogViewer(name, title)
             " split mode
             " TODO: maybe use g:buffergator_viewport_split_policy?
             if empty(a:split_cmd)
+                let result = "sb"
+                if 1 == s:_buffergator_develop
+                    call boot#log_silent("acquire_viewport::result = \"sb\"", result)
+                endif
                 return "sb"
             else
+                let result = a:split_cmd
+                if 1 == s:_buffergator_develop
+                    call boot#log_silent("acquire_viewport::result = a:split_cmd", result)
+                endif
                 return a:split_cmd
             endif
         else
             try
-                if !self.is_usable_viewport(winnr("#"))
-                    execute(self.first_usable_viewport() . "wincmd w")
+                if self.is_usable_viewport(self.calling_bufnum)
+                    let result = execute(bufwinnr(self.calling_bufnum) . "wincmd w")
+                    if 1 == s:_buffergator_develop
+                        call boot#log_silent('acquire_viewport::result = execute(bufwinnr(self.calling_bufnum) . "wincmd w")', result)
+                    endif
                 else
-                    execute('wincmd p')
+                    let result = execute(self.first_usable_viewport() . "wincmd w")
+                    if 1 == s:_buffergator_develop
+                        call boot#log_silent('acquire_viewport::result = execute(self.first_usable_viewport() . "wincmd w")', result)
+                    endif
                 endif
             catch /^Vim\%((\a\+)\)\=:E37/
                 echo v:exception
@@ -848,6 +879,7 @@ function! s:NewCatalogViewer(name, title)
             endtry
             return a:split_cmd
         endif
+        return result
     endfunction
 
     " Finds next occurrence of specified pattern.
@@ -1066,6 +1098,7 @@ function! s:NewBufferCatalogViewer()
         else
             let self.calling_bufnum = bufnr("%")
         endif
+        let self.calling_bufname = bufname("%")
         " get buffer number of the catalog view buffer, creating it if neccessary
         if self.bufnum < 0 || !bufexists(self.bufnum)
             " create and render a new buffer
@@ -1298,7 +1331,8 @@ function! s:NewBufferCatalogViewer()
         if empty(l:split_cmd)
             " explicit split command not given: switch to buffer in current
             " window
-            let &switchbuf="useopen"
+            " let &switchbuf="useopen"
+            let &switchbuf="uselast"
             execute("silent buffer " . a:bufnum)
         else
             " explcit split command given: split current window
@@ -1341,15 +1375,27 @@ function! s:NewBufferCatalogViewer()
             return 0
         endif
         let l:cur_tab_num = tabpagenr()
+        if (self.split_mode != "buffer" || !empty(a:split_cmd)) && !a:keep_catalog
+            call self.close(0)
+        endif
+        if 1 == s:_buffergator_develop
+            let bnum = bufnr(self.calling_bufname)
+            " https://github.com/trailblazing/boot
+            call boot#log_silent("visit_target::self.calling_bufname", self.calling_bufname)
+            call boot#log_silent("visit_target::self.calling_bufname::bnum", bnum)
+            call boot#log_silent("visit_target::self.calling_bufnum", self.calling_bufnum)
+            call boot#log_silent("visit_target::self.calling_bufname::bnum::bufwinnr(bnum)", bufwinnr(bnum))
+            " execute(bufwinnr(bnum) . "wincmd w")
+            " execute("silent buffer " . l:jump_to_bufnum)
+        endif
+        " else
         call self.visit_buffer(l:jump_to_bufnum, a:split_cmd)
+        " endif
         if a:keep_catalog && a:refocus_catalog
             execute("tabnext " . l:cur_tab_num)
             execute(bufwinnr(self.bufnum) . "wincmd w")
         endif
         call s:_buffergator_messenger.send_info(expand(bufname(l:jump_to_bufnum)))
-        if (self.split_mode != "buffer" || !empty(a:split_cmd)) && !a:keep_catalog
-            call self.close(0)
-        endif
     endfunction
 
     " Go to the selected buffer, preferentially using a window that already is
