@@ -83,6 +83,16 @@ if ! exists("g:_buffergator_develop")
 else
     let s:_buffergator_develop = g:_buffergator_develop
 endif
+if 0 == s:_buffergator_develop
+    " boot#log_silent will generate nothing when g:_buffergator_develop is 0
+    let s:log_silent = {-> "" }
+elseif exists("g:_buffergator_log_func_name")
+    let s:log_silent = function(g:_buffergator_log_func)
+else
+    " Just for development
+    " https://github.com/trailblazing/boot
+    let s:log_silent = function('boot#log_silent')
+endif
 
 " 1}}}
 
@@ -347,7 +357,7 @@ function! s:_is_full_width_window(win_num)
     else
         return 0
     endif
-endfunction!
+endfunction
 
 function! s:_is_full_height_window(win_num)
     if winheight(a:win_num) + &cmdheight + 1 == &lines
@@ -355,7 +365,7 @@ function! s:_is_full_height_window(win_num)
     else
         return 0
     endif
-endfunction!
+endfunction
 
 function! s:_find_mru_bufnr(dir, buffergator_mru)
     let l:cur_buf_idx = index(a:buffergator_mru, bufnr("%"))
@@ -698,20 +708,100 @@ function! s:NewCatalogViewer(name, title)
         " endif
     endfunction
 
+    " Observe the default behavior
+    function! catalog_viewer.on_winleave() dict
+        " if ! exists('getbufvar(bufnr("%"), "")["is_buffergator_buffer"]')
+        if winnr() != bufwinnr(self.bufnum)
+            " current bufwinnr("%") value is buffergator winnr when create buffergator
+            " let self.calling_bufnum = bufnr("%")
+            " let self.calling_bufname = bufname("%")
+            call s:log_silent(s:_buffergator_develop,
+                \ "catalog_viewer.on_winleave()::self.calling_bufname", self.calling_bufname)
+            call s:log_silent(s:_buffergator_develop,
+                \ "catalog_viewer.on_winleave()::self.calling_bufnum", self.calling_bufnum)
+        endif
+        call s:log_silent(s:_buffergator_develop, "catalog_viewer.on_winleave()::winnr()", winnr())
+        call s:log_silent(s:_buffergator_develop, "catalog_viewer.on_winleave()::bufwinnr(self.bufnum)", bufwinnr(self.bufnum))
+        call s:log_silent(s:_buffergator_develop, 'catalog_viewer.on_winleave()::bufwinnr(\"\%\")', bufwinnr("%"))
+        call s:log_silent(s:_buffergator_develop, 'catalog_viewer.on_winleave()::bufname(\"\%\")', bufname("%"))
+    endfunction
+
     " Close and quit the viewer.
     function! catalog_viewer.close(restore_prev_window) dict
         if self.bufnum < 0 || !bufexists(self.bufnum)
             return
         endif
         call self.contract_screen()
-        execute("bwipe " . self.bufnum)
+        call s:log_silent(s:_buffergator_develop, "catalog_viewer.close::before wipe self.bufnum", self.bufnum)
+        let bnum = bufnr(self.calling_bufname)
+        let winnum = bufwinnr(bnum)
+        call s:log_silent(s:_buffergator_develop,
+            \ "----catalog_viewer.close::self.calling_bufname", self.calling_bufname)
+        call s:log_silent(s:_buffergator_develop,
+            \ "----catalog_viewer.close::bufnr(self.calling_bufname)", bufnr(self.calling_bufname))
+        call s:log_silent(s:_buffergator_develop,
+            \ "----catalog_viewer.close::self.calling_bufnum", self.calling_bufnum)
+        call s:log_silent(s:_buffergator_develop,
+            \ "----catalog_viewer.close::self.calling_bufname::winnr", winnum)
+        call s:log_silent(s:_buffergator_develop,
+            \ '----catalog_viewer.close::bufnr(\"\%\")', bufnr('%'))
+        call s:log_silent(s:_buffergator_develop,
+            \ '----catalog_viewer.close::bufname(\"\%\")', bufname('%'))
+
+        call s:log_silent(s:_buffergator_develop, "catalog_viewer.close::after wipe self.bufnum", self.bufnum)
+        execute("bwipe! " . self.bufnum)
+        " execute(bufwinnr(self.bufnum) . " hide!")
+        " execute(self.bufnum . " bdelete!")
+
+        let bnum = bufnr(self.calling_bufname)
+        let winnum = bufwinnr(bnum)
+        call s:log_silent(s:_buffergator_develop,
+            \ "----catalog_viewer.close::self.calling_bufname", self.calling_bufname)
+        call s:log_silent(s:_buffergator_develop,
+            \ "----catalog_viewer.close::bufnr(self.calling_bufname)", bufnr(self.calling_bufname))
+        call s:log_silent(s:_buffergator_develop,
+            \ "----catalog_viewer.close::self.calling_bufnum", self.calling_bufnum)
+        call s:log_silent(s:_buffergator_develop,
+            \ "----catalog_viewer.close::self.calling_bufname::winnr", winnum)
+        call s:log_silent(s:_buffergator_develop,
+            \ '----catalog_viewer.close::bufnr(\"\%\")', bufnr('%'))
+        call s:log_silent(s:_buffergator_develop,
+            \ '----catalog_viewer.close::bufname(\"\%\")', bufname('%'))
         if a:restore_prev_window
-            if !self.is_usable_viewport(winnr("#")) && self.first_usable_viewport() ==# -1
+            if !self.is_available_buffer_number(winbufnr(winnr("#"))) && self.first_usable_viewport() ==# -1
             else
                 try
-                    if self.is_usable_viewport(self.calling_bufnum)
+                    call s:log_silent(s:_buffergator_develop,
+                        \ "catalog_viewer.close::self.is_available_buffer_number(self.calling_bufnum)",
+                        \ self.is_available_buffer_number(self.calling_bufnum))
+                    if self.is_available_buffer_number(self.calling_bufnum)
+                        call s:log_silent(s:_buffergator_develop, "catalog_viewer.close::before switch to buffer num", bnum)
+                        call s:log_silent(s:_buffergator_develop,
+                            \ "----catalog_viewer.close::self.calling_bufname", self.calling_bufname)
+                        call s:log_silent(s:_buffergator_develop,
+                            \ "----catalog_viewer.close::self.bufnum", self.bufnum)
+                        call s:log_silent(s:_buffergator_develop,
+                            \ "----catalog_viewer.close::self.calling_bufnum", self.calling_bufnum)
+                        call s:log_silent(s:_buffergator_develop,
+                            \ "----catalog_viewer.close::will go to bufwinnr(self.calling_bufnum)",
+                            \ bufwinnr(self.calling_bufnum))
+
+                        call s:log_silent(s:_buffergator_develop, "catalog_viewer.close::after switch to buffer num", bnum)
                         execute(bufwinnr(self.calling_bufnum) . "wincmd w")
+
+                        call s:log_silent(s:_buffergator_develop,
+                            \ "----catalog_viewer.close::self.calling_bufname", self.calling_bufname)
+                        call s:log_silent(s:_buffergator_develop,
+                            \ "----catalog_viewer.close::self.bufnum", self.bufnum)
+                        call s:log_silent(s:_buffergator_develop,
+                            \ "----catalog_viewer.close::self.calling_bufnum", self.calling_bufnum)
+                        call s:log_silent(s:_buffergator_develop,
+                            \ "----catalog_viewer.close::after arrived at " . bnum . ", bufwinnr(self.calling_bufnum)",
+                            \ bufwinnr(self.calling_bufnum))
                     else
+                        call s:log_silent(s:_buffergator_develop,
+                            \ "catalog_viewer.close::will go to self.first_usable_viewport()",
+                            \ self.first_usable_viewport())
                         execute(self.first_usable_viewport() . "wincmd w")
                     endif
                 catch //
@@ -799,7 +889,7 @@ function! s:NewCatalogViewer(name, title)
         let usable_index = -1
         let i = 1
         while i <= winnr("$")
-            if 1 == self.is_usable_viewport(i)
+            if 1 == self.is_available_buffer_number(winbufnr(i))
                 let usable_index = i
                 break
             endif
@@ -810,14 +900,17 @@ function! s:NewCatalogViewer(name, title)
 
     " from NERD_Tree: returns 0 if opening a file from the tree in the given
     " window requires it to be split, 1 otherwise
-    function! catalog_viewer.is_usable_viewport(winnumber) dict
+    function! catalog_viewer.is_available_buffer_number(_buf_num) dict
         let usable = 0
-        let bnum = winbufnr(a:winnumber)
-        if bnum != -1 && getbufvar(bnum, '&buftype') ==# ''
-            \ && ! exists('getbufvar(bnum, "")["is_buffergator_buffer"]')
-            \ && 1 == getbufvar(bnum, '&modifiable')
-            \ && ! getwinvar(a:winnumber, '&previewwindow')
-            \ && (! getbufvar(bnum, '&modified') || &hidden)
+        if ! buflisted(a:_buf_num)
+            return usable
+        endif
+        let l:winnum = bufwinnr(a:_buf_num)
+        if a:_buf_num != -1 && getbufvar(a:_buf_num, '&buftype') ==# ''
+            \ && ! exists('getbufvar(a:_buf_num, "")["is_buffergator_buffer"]')
+            \ && 1 == getbufvar(a:_buf_num, '&modifiable')
+            \ && ! getwinvar(l:winnum, '&previewwindow')
+            \ && (! getbufvar(a:_buf_num, '&modified') || &hidden)
             " \ && self.num_viewports_on_buffer(winbufnr(a:winnumber)) >= 2
             let usable = 1
         endif
@@ -828,49 +921,46 @@ function! s:NewCatalogViewer(name, title)
     " to use when switching to the buffer.
     function! catalog_viewer.acquire_viewport(split_cmd)
         let result = ""
-        if 1 == s:_buffergator_develop
-            " https://github.com/trailblazing/boot
-            call boot#log_silent('acquire_viewport::self.is_usable_viewport(winnr(\"\#\"))', self.is_usable_viewport(winnr("#")))
-            call boot#log_silent("acquire_viewport::self.is_usable_viewport(" . self.calling_bufnum . ")", self.is_usable_viewport(self.calling_bufnum))
-            call boot#log_silent("acquire_viewport::self.first_usable_viewport()", self.first_usable_viewport())
-        endif
+        call s:log_silent(s:_buffergator_develop,
+            \ 'acquire_viewport::self.is_available_buffer_number(winbufnr(winnr(\"\#\")))',
+            \ self.is_available_buffer_number(winbufnr(winnr("#"))))
+        call s:log_silent(s:_buffergator_develop,
+            \ "acquire_viewport::self.is_available_buffer_number(" . self.calling_bufnum . ")",
+            \ self.is_available_buffer_number(self.calling_bufnum))
+        call s:log_silent(s:_buffergator_develop,
+            \ "acquire_viewport::self.first_usable_viewport()", self.first_usable_viewport())
         if self.split_mode == "buffer" && empty(a:split_cmd)
-            if 1 == s:_buffergator_develop
-                call boot#log_silent("acquire_viewport::result = \"\"", result)
-            endif
+            call s:log_silent(s:_buffergator_develop, "acquire_viewport::result = \"\"", result)
             " buffergator used original buffer's viewport,
             " so the the buffergator viewport is the viewport to use
             return ""
         endif
-        if !self.is_usable_viewport(winnr("#")) && self.first_usable_viewport() ==# -1
+        if !self.is_available_buffer_number(winbufnr(winnr("#"))) && self.first_usable_viewport() ==# -1
             " no appropriate viewport is available: create new using default
             " split mode
             " TODO: maybe use g:buffergator_viewport_split_policy?
             if empty(a:split_cmd)
                 let result = "sb"
-                if 1 == s:_buffergator_develop
-                    call boot#log_silent("acquire_viewport::result = \"sb\"", result)
-                endif
+                call s:log_silent(s:_buffergator_develop, "acquire_viewport::result = \"sb\"", result)
                 return "sb"
             else
                 let result = a:split_cmd
-                if 1 == s:_buffergator_develop
-                    call boot#log_silent("acquire_viewport::result = a:split_cmd", result)
-                endif
+                call s:log_silent(s:_buffergator_develop, "acquire_viewport::result = a:split_cmd", result)
                 return a:split_cmd
             endif
         else
             try
-                if self.is_usable_viewport(self.calling_bufnum)
+                call s:log_silent(s:_buffergator_develop,
+                    \ "catalog_viewer.acquire_viewport(split_cmd)::self.is_available_buffer_number(self.calling_bufnum)",
+                    \ self.is_available_buffer_number(self.calling_bufnum))
+                if self.is_available_buffer_number(self.calling_bufnum)
                     let result = execute(bufwinnr(self.calling_bufnum) . "wincmd w")
-                    if 1 == s:_buffergator_develop
-                        call boot#log_silent('acquire_viewport::result = execute(bufwinnr(self.calling_bufnum) . "wincmd w")', result)
-                    endif
+                    call s:log_silent(s:_buffergator_develop,
+                        \ 'acquire_viewport::result = execute(bufwinnr(self.calling_bufnum) . "wincmd w")', result)
                 else
                     let result = execute(self.first_usable_viewport() . "wincmd w")
-                    if 1 == s:_buffergator_develop
-                        call boot#log_silent('acquire_viewport::result = execute(self.first_usable_viewport() . "wincmd w")', result)
-                    endif
+                    call s:log_silent(s:_buffergator_develop,
+                        \ 'acquire_viewport::result = execute(self.first_usable_viewport() . "wincmd w")', result)
                 endif
             catch /^Vim\%((\a\+)\)\=:E37/
                 echo v:exception
@@ -1078,7 +1168,7 @@ function! s:NewBufferCatalogViewer()
 
     " Populates the buffer list
     function! catalog_viewer.update_buffers_info() dict
-        let self.calling_bufnum = bufnr("%")
+        let self.calling_bufname = bufname("%")
         let self.buffers_catalog = self.list_buffers()
         " let self.buffers_catalog = self.get_buffers()
         return self.buffers_catalog
@@ -1099,7 +1189,6 @@ function! s:NewBufferCatalogViewer()
         else
             let self.calling_bufnum = bufnr("%")
         endif
-        let self.calling_bufname = bufname("%")
         " get buffer number of the catalog view buffer, creating it if neccessary
         if self.bufnum < 0 || !bufexists(self.bufnum)
             " create and render a new buffer
@@ -1382,10 +1471,11 @@ function! s:NewBufferCatalogViewer()
         if 1 == s:_buffergator_develop
             let bnum = bufnr(self.calling_bufname)
             " https://github.com/trailblazing/boot
-            call boot#log_silent("visit_target::self.calling_bufname", self.calling_bufname)
-            call boot#log_silent("visit_target::self.calling_bufname::bnum", bnum)
-            call boot#log_silent("visit_target::self.calling_bufnum", self.calling_bufnum)
-            call boot#log_silent("visit_target::self.calling_bufname::bnum::bufwinnr(bnum)", bufwinnr(bnum))
+            call s:log_silent(s:_buffergator_develop, "visit_target::self.calling_bufname", self.calling_bufname)
+            call s:log_silent(s:_buffergator_develop, "visit_target::self.calling_bufname::bnum", bnum)
+            call s:log_silent(s:_buffergator_develop, "visit_target::self.calling_bufnum", self.calling_bufnum)
+            call s:log_silent(s:_buffergator_develop,
+                \ "visit_target::self.calling_bufname::bnum::bufwinnr(bnum)", bufwinnr(bnum))
             " execute(bufwinnr(bnum) . "wincmd w")
             " execute("silent buffer " . l:jump_to_bufnum)
         endif
@@ -1633,7 +1723,7 @@ function! s:NewTabCatalogViewer()
 
     " Populates the buffer list
     function! catalog_viewer.update_buffers_info() dict
-        let self.calling_bufnum = bufnr("%")
+        let self.calling_bufname = bufname("%")
         let self.tab_catalog = []
         for tabnum in range(1, tabpagenr('$'))
             call add(self.tab_catalog, tabpagebuflist(tabnum))
@@ -1886,6 +1976,10 @@ function! buffergator#UpdateBuffergator(event, affected)
     let l:buffergators = s:_find_buffers_with_var("is_buffergator_buffer",1)
     call s:_catalog_viewer.update_buffers_info()
 
+    " if a:event == "leave"
+    "     call s:_catalog_viewer.on_winleave()
+    " endif
+
     " BufDelete is the last Autocommand executed, but it's done BEFORE the
     " buffer is actually deleted. - preemptively remove the buffer from
     " the list if this is a delete event
@@ -1914,17 +2008,17 @@ function! buffergator#UpdateBuffergator(event, affected)
         endif
     endfor
     if exists("b:is_buffergator_buffer") && !l:self_call
-        try
-            execute l:prev_winnr . "wincmd w"
-            execute l:curr_winnr . "wincmd w"
-        catch //
-        endtry
+        " try
+        "     execute l:prev_winnr . "wincmd w"
+        "     execute l:curr_winnr . "wincmd w"
+        " catch //
+        " endtry
     elseif a:event == 'delete' && !l:self_call
-        try
-            execute l:prev_winnr . "wincmd w"
-            execute l:curr_winnr . "wincmd w"
-        catch //
-        endtry
+        " try
+        "     execute l:prev_winnr . "wincmd w"
+        "     execute l:curr_winnr . "wincmd w"
+        " catch //
+        " endtry
     endif
 endfunction
 
@@ -1977,9 +2071,11 @@ let s:_catalog_viewer = s:NewBufferCatalogViewer()
 let s:_tab_catalog_viewer = s:NewTabCatalogViewer()
 augroup BufferGatorAuto
 au!
-autocmd BufDelete * call buffergator#UpdateBuffergator('delete',expand('<abuf>'))
-autocmd BufEnter * call buffergator#UpdateBuffergator('enter',expand('<abuf>'))
-autocmd BufWritePost * call buffergator#UpdateBuffergator('writepost',expand('<abuf>'))
+autocmd BufDelete * call buffergator#UpdateBuffergator('delete', expand('<abuf>'))
+autocmd BufEnter,BufWinEnter,BufNew * call buffergator#UpdateBuffergator('enter', expand('<abuf>'))
+" autocmd WinLeave * call buffergator#UpdateBuffergator('leave', expand('<abuf>'))
+autocmd WinLeave * call s:_catalog_viewer.on_winleave()
+autocmd BufWritePost * call buffergator#UpdateBuffergator('writepost', expand('<abuf>'))
 augroup NONE
 " 1}}}
 
