@@ -1405,7 +1405,7 @@ function! s:NewBufferCatalogViewer()
     function! catalog_viewer.get_target_bufnum(cmd_count) dict
         if a:cmd_count == 0
             let l:cur_line = line(".")
-            if !has_key(l:self.jump_map, l:cur_line)
+            if !has_key(self.jump_map, l:cur_line)
                 call s:_buffergator_messenger.send_info("Not a valid navigation line")
                 return -1
             endif
@@ -1820,7 +1820,7 @@ function! s:NewTabCatalogViewer()
     " Go to the selected buffer.
     function! catalog_viewer.visit_target() dict
         let l:cur_line = line(".")
-        if !has_key(l:self.jump_map, l:cur_line)
+        if !has_key(self.jump_map, l:cur_line)
             call s:_buffergator_messenger.send_info("Not a valid navigation line")
             return 0
         endif
@@ -1848,17 +1848,21 @@ endfunction
 function! BuffergatorBuffersStatusLine()
     let l:line = line(".")
     let l:status_line = "[[buffergator]]"
-    if has_key(l:self, "jump_map") && has_key(l:self.jump_map, l:line)
-        let l:status_line .= " Buffer " . string(l:line) . " of " . string(line('$'))
+    if has_key(b:buffergator_catalog_viewer, 'jump_map')
+        if has_key(b:buffergator_catalog_viewer.jump_map, l:line)
+            let l:status_line .= " Buffer " . string(l:line) . " of " . string(line('$'))
+        endif
     endif
     return l:status_line
 endfunction
 function! BuffergatorTabsStatusLine()
     let l:status_line = "[[buffergator]]"
     let l:line = line(".")
-    if has_key(l:self, "jump_map") && has_key(l:self.jump_map, l:line)
-        let l:status_line .= " Tab Page: " . l:self.jump_map[l:line].target[0]
-        let l:status_line .= ", Window: " . l:self.jump_map[l:line].target[1]
+    if has_key(b:buffergator_catalog_viewer, 'jump_map')
+        if has_key(b:buffergator_catalog_viewer.jump_map, l:line)
+            let l:status_line .= " Tab Page: " . b:buffergator_catalog_viewer.jump_map[l:line].target[0]
+            let l:status_line .= ", Window: " . b:buffergator_catalog_viewer.jump_map[l:line].target[1]
+        endif
     endif
     return l:status_line
 endfunction
