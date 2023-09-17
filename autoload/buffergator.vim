@@ -248,6 +248,7 @@ function! s:NewMessenger(name)
 		redraw
 		echohl ErrorMsg
 		echomsg self.format_message("[ERROR] ", a:msg)
+		call feedkeys("\<CR>")
 		echohl None
 	endfunction
 
@@ -255,6 +256,7 @@ function! s:NewMessenger(name)
 		redraw
 		echohl WarningMsg
 		echomsg self.format_message("[WARNING] ", a:msg)
+		call feedkeys("\<CR>")
 		echohl None
 	endfunction
 
@@ -262,12 +264,14 @@ function! s:NewMessenger(name)
 		redraw
 		echohl None
 		echomsg self.format_message("", a:msg)
+		call feedkeys("\<CR>")
 	endfunction
 
 	function! l:messenger.send_info(msg) dict
 		redraw
 		echohl None
 		echo self.format_message("", a:msg)
+		call feedkeys("\<CR>")
 	endfunction
 
 	return l:messenger
@@ -1211,7 +1215,7 @@ function! s:NewBufferCatalogViewer()
 
 		call self.disable_editing_keymaps()
 
-		noremap <buffer> <silent> <Esc>      :call b:gt_catalog_viewer.close(1)<CR>
+		noremap <buffer> <silent> <Esc>		 :call b:gt_catalog_viewer.close(1)<CR>
 
 		if !exists("g:buffergator_use_new_keymap") || !g:buffergator_use_new_keymap
 
@@ -1230,13 +1234,13 @@ function! s:NewBufferCatalogViewer()
 			noremap <buffer> <silent> X  :<C-U>call b:gt_catalog_viewer.delete_target(1, 1)<CR>
 
 			""""" Selection: show target and switch focus
-			noremap <buffer> <silent> <CR>  :<C-U>call b:gt_catalog_viewer.visit_target(!g:gt_autodismiss_on_select, 0, "")<CR>
-			noremap <buffer> <silent> o     :<C-U>call b:gt_catalog_viewer.visit_target(!g:gt_autodismiss_on_select, 0, "")<CR>
-			noremap <buffer> <silent> s     :<C-U>call b:gt_catalog_viewer.visit_target(!g:gt_autodismiss_on_select, 0, "vert sb")<CR>
+			noremap <buffer> <silent> <CR>	:<C-U>call b:gt_catalog_viewer.visit_target(!g:gt_autodismiss_on_select, 0, "")<CR>
+			noremap <buffer> <silent> o		:<C-U>call b:gt_catalog_viewer.visit_target(!g:gt_autodismiss_on_select, 0, "")<CR>
+			noremap <buffer> <silent> s		:<C-U>call b:gt_catalog_viewer.visit_target(!g:gt_autodismiss_on_select, 0, "vert sb")<CR>
 			noremap <buffer> <silent> <C-v> :<C-U>call b:gt_catalog_viewer.visit_target(!g:gt_autodismiss_on_select, 0, "vert sb")<CR>
-			noremap <buffer> <silent> i     :<C-U>call b:gt_catalog_viewer.visit_target(!g:gt_autodismiss_on_select, 0, "sb")<CR>
+			noremap <buffer> <silent> i		:<C-U>call b:gt_catalog_viewer.visit_target(!g:gt_autodismiss_on_select, 0, "sb")<CR>
 			noremap <buffer> <silent> <C-s> :<C-U>call b:gt_catalog_viewer.visit_target(!g:gt_autodismiss_on_select, 0, "sb")<CR>
-			noremap <buffer> <silent> t     :<C-U>call b:gt_catalog_viewer.visit_target(!g:gt_autodismiss_on_select, 0, "tab sb")<CR>
+			noremap <buffer> <silent> t		:<C-U>call b:gt_catalog_viewer.visit_target(!g:gt_autodismiss_on_select, 0, "tab sb")<CR>
 			noremap <buffer> <silent> <C-t> :<C-U>call b:gt_catalog_viewer.visit_target(!g:gt_autodismiss_on_select, 0, "tab sb")<CR>
 
 			""""" Selection: show target and switch focus, preserving the catalog regardless of the autodismiss setting
@@ -1246,18 +1250,18 @@ function! s:NewBufferCatalogViewer()
 			noremap <buffer> <silent> pt :<C-U>call b:gt_catalog_viewer.visit_target(1, 0, "tab sb")<CR>
 
 			""""" Preview: show target , keeping focus on catalog
-			noremap <buffer> <silent> O         :<C-U>call b:gt_catalog_viewer.visit_target(1, 1, "")<CR>
-			noremap <buffer> <silent> go        :<C-U>call b:gt_catalog_viewer.visit_target(1, 1, "")<CR>
-			noremap <buffer> <silent> S         :<C-U>call b:gt_catalog_viewer.visit_target(1, 1, "vert sb")<CR>
-			noremap <buffer> <silent> gs        :<C-U>call b:gt_catalog_viewer.visit_target(1, 1, "vert sb")<CR>
-			noremap <buffer> <silent> I         :<C-U>call b:gt_catalog_viewer.visit_target(1, 1, "sb")<CR>
-			noremap <buffer> <silent> gi        :<C-U>call b:gt_catalog_viewer.visit_target(1, 1, "sb")<CR>
-			noremap <buffer> <silent> T         :<C-U>call b:gt_catalog_viewer.visit_target(1, 1, "tab sb")<CR>
-			noremap <buffer> <silent> <SPACE>   :<C-U>call b:gt_catalog_viewer.goto_index_entry("n", 1, 1)<CR>
+			noremap <buffer> <silent> O			:<C-U>call b:gt_catalog_viewer.visit_target(1, 1, "")<CR>
+			noremap <buffer> <silent> go		:<C-U>call b:gt_catalog_viewer.visit_target(1, 1, "")<CR>
+			noremap <buffer> <silent> S			:<C-U>call b:gt_catalog_viewer.visit_target(1, 1, "vert sb")<CR>
+			noremap <buffer> <silent> gs		:<C-U>call b:gt_catalog_viewer.visit_target(1, 1, "vert sb")<CR>
+			noremap <buffer> <silent> I			:<C-U>call b:gt_catalog_viewer.visit_target(1, 1, "sb")<CR>
+			noremap <buffer> <silent> gi		:<C-U>call b:gt_catalog_viewer.visit_target(1, 1, "sb")<CR>
+			noremap <buffer> <silent> T			:<C-U>call b:gt_catalog_viewer.visit_target(1, 1, "tab sb")<CR>
+			noremap <buffer> <silent> <SPACE>	:<C-U>call b:gt_catalog_viewer.goto_index_entry("n", 1, 1)<CR>
 			noremap <buffer> <silent> <C-SPACE> :<C-U>call b:gt_catalog_viewer.goto_index_entry("p", 1, 1)<CR>
-			noremap <buffer> <silent> <C-@>     :<C-U>call b:gt_catalog_viewer.goto_index_entry("p", 1, 1)<CR>
-			noremap <buffer> <silent> <C-N>     :<C-U>call b:gt_catalog_viewer.goto_index_entry("n", 1, 1)<CR>
-			noremap <buffer> <silent> <C-P>     :<C-U>call b:gt_catalog_viewer.goto_index_entry("p", 1, 1)<CR>
+			noremap <buffer> <silent> <C-@>		:<C-U>call b:gt_catalog_viewer.goto_index_entry("p", 1, 1)<CR>
+			noremap <buffer> <silent> <C-N>		:<C-U>call b:gt_catalog_viewer.goto_index_entry("n", 1, 1)<CR>
+			noremap <buffer> <silent> <C-P>		:<C-U>call b:gt_catalog_viewer.goto_index_entry("p", 1, 1)<CR>
 
 			""""" Preview: go to existing window showing target
 			noremap <buffer> <silent> E  :<C-U>call b:gt_catalog_viewer.visit_open_target(1, !g:gt_autodismiss_on_select, "")<CR>
@@ -1282,16 +1286,16 @@ function! s:NewBufferCatalogViewer()
 			noremap <buffer> <silent> <CR>	:call b:gt_catalog_viewer.visit_target(!g:gt_autodismiss_on_select, 0, "")<CR>
 
 			" show target line in other window, keeping catalog open and in focus
-			noremap <buffer> <silent> .         :call b:gt_catalog_viewer.visit_target(1, 1, "")<CR>
-			noremap <buffer> <silent> po        :call b:gt_catalog_viewer.visit_target(1, 1, "")<CR>
-			noremap <buffer> <silent> ps        :call b:gt_catalog_viewer.visit_target(1, 1, "sb")<CR>
-			noremap <buffer> <silent> pv        :call b:gt_catalog_viewer.visit_target(1, 1, "vert sb")<CR>
-			noremap <buffer> <silent> pt        :call b:gt_catalog_viewer.visit_target(1, 1, "tab sb")<CR>
-			noremap <buffer> <silent> <SPACE>   :<C-U>call b:gt_catalog_viewer.goto_index_entry("n", 1, 1)<CR>
+			noremap <buffer> <silent> .			:call b:gt_catalog_viewer.visit_target(1, 1, "")<CR>
+			noremap <buffer> <silent> po		:call b:gt_catalog_viewer.visit_target(1, 1, "")<CR>
+			noremap <buffer> <silent> ps		:call b:gt_catalog_viewer.visit_target(1, 1, "sb")<CR>
+			noremap <buffer> <silent> pv		:call b:gt_catalog_viewer.visit_target(1, 1, "vert sb")<CR>
+			noremap <buffer> <silent> pt		:call b:gt_catalog_viewer.visit_target(1, 1, "tab sb")<CR>
+			noremap <buffer> <silent> <SPACE>	:<C-U>call b:gt_catalog_viewer.goto_index_entry("n", 1, 1)<CR>
 			noremap <buffer> <silent> <C-SPACE> :<C-U>call b:gt_catalog_viewer.goto_index_entry("p", 1, 1)<CR>
-			noremap <buffer> <silent> <C-@>     :<C-U>call b:gt_catalog_viewer.goto_index_entry("p", 1, 1)<CR>
-			noremap <buffer> <silent> <C-N>     :<C-U>call b:gt_catalog_viewer.goto_index_entry("n", 1, 1)<CR>
-			noremap <buffer> <silent> <C-P>     :<C-U>call b:gt_catalog_viewer.goto_index_entry("p", 1, 1)<CR>
+			noremap <buffer> <silent> <C-@>		:<C-U>call b:gt_catalog_viewer.goto_index_entry("p", 1, 1)<CR>
+			noremap <buffer> <silent> <C-N>		:<C-U>call b:gt_catalog_viewer.goto_index_entry("n", 1, 1)<CR>
+			noremap <buffer> <silent> <C-P>		:<C-U>call b:gt_catalog_viewer.goto_index_entry("p", 1, 1)<CR>
 
 			" go to target line in other window, keeping catalog open
 			noremap <buffer> <silent> o  :call b:gt_catalog_viewer.visit_target(1, 0, "")<CR>
@@ -1750,23 +1754,23 @@ function! s:NewTabCatalogViewer()
 			" syn match BuffergatorTabPageLineStart '^==== Tab Page \[' nextgroup=BuffergatorTabPageNumber
 			" syn match BuffergatorTabPageNumber '\d\+' nextgroup=BuffergatorTabPageLineEnd
 			" syn match BuffergatorTabPageLineEnd '\] ====$'
-			syn region BuffergatorModifiedFileLine   start='^\[\s\{-}.\{-1,}\s\{-}\] + '
+			syn region BuffergatorModifiedFileLine	 start='^\[\s\{-}.\{-1,}\s\{-}\] + '
 				\ keepend oneline end='$'
 			syn region BuffergatorUnmodifiedFileLine start='^\[\s\{-}.\{-1,}\s\{-}\]   '
 				\ keepend oneline end='$'
-			syn match BuffergatorModifiedFileSyntaxKey   '^\zs\[\s\{-}.\{-1,}\s\{-}\]\ze'
+			syn match BuffergatorModifiedFileSyntaxKey	 '^\zs\[\s\{-}.\{-1,}\s\{-}\]\ze'
 				\ containedin=BuffergatorModifiedFileLine nextgroup=BuffergatorModifiedFilename
 			syn match BuffergatorUnmodifiedFileSyntaxKey '^\zs\[\s\{-}.\{-1,}\s\{-}\]\ze'
 				\ containedin=BuffergatorUnmodifiedFileLine nextgroup=BuffergatorUnmodifiedFilename
-			syn match BuffergatorModifiedFilename   ' + .\+$'
+			syn match BuffergatorModifiedFilename	' + .\+$'
 				\ containedin=BuffergatorModifiedFilenameEntry
 			syn match BuffergatorUnmodifiedFilename ' .\+$'
 				\ containedin=BuffergatorUnmodifiedFileLine
-			hi! link BuffergatorModifiedFileSyntaxKey   LineNr
+			hi! link BuffergatorModifiedFileSyntaxKey	LineNr
 			hi! link BuffergatorUnmodifiedFileSyntaxKey LineNr
-			hi! link BuffergatorModifiedFileFlag        WarningMsg
-			hi! link BuffergatorModifiedFilename        WarningMsg
-			hi! link BuffergatorTabPageLine             Title
+			hi! link BuffergatorModifiedFileFlag		WarningMsg
+			hi! link BuffergatorModifiedFilename		WarningMsg
+			hi! link BuffergatorTabPageLine				Title
 			" hi! link BufergatorModifiedFilename NonText
 			" hi! link BufergatorUnmodifiedFilename NonText
 			" hi! link BuffergatorTabPageLineStart Title
@@ -1781,20 +1785,20 @@ function! s:NewTabCatalogViewer()
 
 		call self.disable_editing_keymaps()
 
-		noremap <buffer> <silent> <Esc>      :call b:gt_catalog_viewer.close(1)<CR>
-		noremap <buffer> <silent> cd         :call b:gt_catalog_viewer.cycle_display_regime()<CR>
-		noremap <buffer> <silent> r          :call b:gt_catalog_viewer.rebuild_catalog()<CR>
-		noremap <buffer> <silent> q          :call b:gt_catalog_viewer.close(1)<CR>
+		noremap <buffer> <silent> <Esc>		 :call b:gt_catalog_viewer.close(1)<CR>
+		noremap <buffer> <silent> cd		 :call b:gt_catalog_viewer.cycle_display_regime()<CR>
+		noremap <buffer> <silent> r			 :call b:gt_catalog_viewer.rebuild_catalog()<CR>
+		noremap <buffer> <silent> q			 :call b:gt_catalog_viewer.close(1)<CR>
 
-		noremap <buffer> <silent> <CR>       :call b:gt_catalog_viewer.visit_target()<CR>
-		noremap <buffer> <silent> o          :call b:gt_catalog_viewer.visit_target()<CR>
+		noremap <buffer> <silent> <CR>		 :call b:gt_catalog_viewer.visit_target()<CR>
+		noremap <buffer> <silent> o			 :call b:gt_catalog_viewer.visit_target()<CR>
 
-		noremap <buffer> <silent> <SPACE>    :<C-U>call b:gt_catalog_viewer.goto_index_entry("n")<CR>
+		noremap <buffer> <silent> <SPACE>	 :<C-U>call b:gt_catalog_viewer.goto_index_entry("n")<CR>
 		noremap <buffer> <silent> <C-SPACE>  :<C-U>call b:gt_catalog_viewer.goto_index_entry("p")<CR>
-		noremap <buffer> <silent> <C-@>      :<C-U>call b:gt_catalog_viewer.goto_index_entry("p")<CR>
-		noremap <buffer> <silent> <C-N>      :<C-U>call b:gt_catalog_viewer.goto_win_entry("n")<CR>
-		noremap <buffer> <silent> <C-P>      :<C-U>call b:gt_catalog_viewer.goto_win_entry("p")<CR>
-		noremap <buffer> <silent> A          :call b:gt_catalog_viewer.toggle_zoom()<CR>
+		noremap <buffer> <silent> <C-@>		 :<C-U>call b:gt_catalog_viewer.goto_index_entry("p")<CR>
+		noremap <buffer> <silent> <C-N>		 :<C-U>call b:gt_catalog_viewer.goto_win_entry("n")<CR>
+		noremap <buffer> <silent> <C-P>		 :<C-U>call b:gt_catalog_viewer.goto_win_entry("p")<CR>
+		noremap <buffer> <silent> A			 :call b:gt_catalog_viewer.toggle_zoom()<CR>
 
 	endfunction
 
@@ -1885,10 +1889,12 @@ function! buffergator#BuffergatorEchoMruList(bang)
 	endif
 	if empty(a:bang)
 		echo l:mru_cycle_list
+		call feedkeys("\<CR>")
 	else
 		for l:idx in range(len(l:mru_cycle_list))
 			let l:entry = l:mru_cycle_list[l:idx]
-			echo l:idx+1 . ". [" . l:entry . "] " .bufname(l:entry)
+			echo l:idx+1 . ". [" . l:entry . "] " . bufname(l:entry)
+			call feedkeys("\<CR>")
 		endfor
 	endif
 endfunction
