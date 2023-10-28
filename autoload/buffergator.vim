@@ -270,7 +270,7 @@ function! s:NewMessenger(name)
 	function! l:messenger.send_info(msg) dict
 		redraw
 		echohl None
-		echo self.format_message("", a:msg)
+		echomsg self.format_message("", a:msg)
 		call feedkeys("\<CR>")
 	endfunction
 
